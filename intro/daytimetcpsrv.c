@@ -12,6 +12,7 @@
 int main(int argc, char **argv)
 {
     int listenfd, connfd;
+    int i, len;
     char buff[MAXLINE];
     time_t ticks;
     struct sockaddr_in servaddr;
@@ -24,7 +25,7 @@ int main(int argc, char **argv)
     
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(AF_INET);
+    servaddr.sin_port = htons(9999);
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if((bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) < 0)
@@ -48,11 +49,15 @@ int main(int argc, char **argv)
         }
         ticks = time(NULL);
         snprintf(buff, sizeof(buff), "%.24s\r\n", ctime(&ticks));
+        len = strlen(buff);        
 
-        if(write(connfd, buff, strlen(buff)) < 0)
+        for(i = 0; i <= len; i++)
         {
-            printf("write error\n");
-            return -1;
+            if(write(connfd, &buff[i], 1) < 0)
+            {
+                printf("write error\n");
+                return -1;
+            }
         }
 
         close(connfd);

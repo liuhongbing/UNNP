@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <strings.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/errno.h>
 #include <netinet/in.h>
 
 #define MAXLINE 100
@@ -10,6 +12,7 @@
 int main(int argc, char **argv)
 {
     int sockfd, n;
+    int rdcount = 0;
     char recvline[MAXLINE + 1];
     struct sockaddr_in servaddr;
 
@@ -21,13 +24,13 @@ int main(int argc, char **argv)
 
     if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        printf("socket error\n");
+        printf("socket error: %s\n", strerror(errno));
         return -1;
     }
  
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(AF_INET);
+    servaddr.sin_port = htons(9999);
     
     if(inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0)
     {
@@ -44,8 +47,11 @@ int main(int argc, char **argv)
     while((n = read(sockfd, recvline, MAXLINE)) > 0)
     { 
         recvline[n] = 0;
+        rdcount++;
         fputs(recvline, stdout);
     }
     
+    printf("rdcount = %d\n", rdcount);
+
     return 0;
 }
